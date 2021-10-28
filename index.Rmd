@@ -1,0 +1,33 @@
+---
+title: "My awesome website"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# This is Jeff's awesome website
+
+![](https://media.giphy.com/media/drXGoW1iudhKw/giphy.gif)
+I can link to useful things like [google](https://www.google.com/) and [p8105](https://www.p8105.com/index.html)
+
+you can make an extra page on your site and link to that witin the first page. 
+
+Here's my [about](about.html).
+
+you can link to the about.html file because you're working within the same repo
+
+## Here's  picture
+
+insert a picture here:
+
+![](images/mia.jpeg)
+OR
+
+<img src="images/mia.jpeg" style="transform:rotate(90deg)">
+
+this code is an example of how knowing a lil html is helpful (bc the above code is html, which rmd can understand)
+
+
+
+
