@@ -41,7 +41,7 @@ instacart_df =
  Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Reorder Frequency
+### What items are orderd the most often?
 
 ```{r}
 
@@ -91,7 +91,6 @@ freq_meat_gg =
 
 freq_df = 
   instacart_df %>%
-  #filter(department %in% c("produce", "meat seafood")) %>%
   group_by(product_name, department) %>%
   summarise(n_ordered = n()) %>% 
   mutate(product_name = forcats::fct_reorder(product_name, n_ordered)) %>%
@@ -104,7 +103,7 @@ freq_gg =
   theme(legend.position = "right", 
         axis.text.x = element_blank(),
         axis.title.x = element_blank()) +
-  labs(y = "Number of Orders Per Product", title = "What Products are Ordered Most Often?")
+  labs(y = "Number of Orders Per Product", title = "Most Frequently Ordered Items by Aisle")
 
 ggplotly(freq_gg)
 
@@ -113,10 +112,19 @@ ggplotly(freq_gg)
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### At What Time of Day are Items Ordered?
 
 ```{r}
 
+instacart_df %>% 
+  group_by(order_hour_of_day, department) %>%
+  summarise(n_ordered = n()) %>% 
+  mutate(
+    text_label = str_c("Hour:", order_hour_of_day, "\n Number Ordered:", n_ordered)
+  ) %>% 
+  plot_ly(
+    y = ~ n_ordered, x = ~order_hour_of_day, color = ~department, text = ~text_label, type = "scatter"
+  )
 
 ```
 
