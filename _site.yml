@@ -4,7 +4,7 @@ navbar:
   title: "Home"
   right:
     - text: "Curriculum Vitae"
-      href: CV.html
+      href: about.html
     - text: "Dashboard: Instacart Data"
       href: dashboard.html
     - icon: fa-envelope-square fa-lg

@@ -1,0 +1,129 @@
+---
+title: "Dashboard: Instacart Data"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    source_code: embed
+---
+```{r setup, include = FALSE}
+library(tidyverse)
+library(p8105.datasets)
+library(plotly)
+library(flexdashboard)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+
+```
+ 
+```{r data cleaning}
+
+data("instacart")
+
+instacart_df = 
+  instacart %>% 
+  select(add_to_cart_order, reordered, order_hour_of_day, product_name, aisle_id, department_id, aisle, department) %>% 
+  filter(reordered == 1, department %in% c("produce", "meat seafood", "dairy eggs", "snacks", "frozen")) %>% 
+  filter(department != "missing")
+
+```
+
+
+ Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Reorder Frequency
+
+```{r}
+
+freq_produce = 
+  instacart_df %>%
+  filter(department == "produce") %>% 
+  group_by(product_name) %>%
+  summarise(n_ordered = n()) %>% 
+  filter(n_ordered >= 2000) %>% 
+  mutate(avg_ordered = mean(n_ordered),
+         norm = n_ordered - avg_ordered) %>% 
+  mutate(product_name = forcats::fct_reorder(product_name, norm)) %>% 
+  mutate(sign = ifelse(norm < 0, "neg", "pos"))
+
+freq_meat =
+  instacart_df %>%
+  #filter(reordered == 1, department %in% c("produce", "meat seafood")) %>% 
+  filter(department == "meat seafood") %>% 
+  group_by(product_name) %>%
+  summarise(n_ordered = n()) %>% 
+  filter(n_ordered >= 100) %>% 
+  mutate(avg_ordered = mean(n_ordered),
+         norm = n_ordered - avg_ordered) %>% 
+  mutate(product_name = forcats::fct_reorder(product_name, norm)) %>% 
+  mutate(sign = ifelse(norm < 0, "neg", "pos"))
+
+freq_produce_gg =
+  freq_produce %>% 
+  ggplot(aes(x = product_name, y = norm, fill = sign)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(name = "Order Frequency",
+                    labels = c("Above Average", "Below Average"),
+                    values = c("pos" = "#00ba38", "neg" = "#f8766d" )) +
+  coord_flip() +
+  theme(legend.position = "right", axis.text.y = element_text(size = 8))
+           
+freq_meat_gg =  
+  freq_meat %>% 
+  ggplot(aes(x = product_name, y = norm, fill = sign)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(name = "Order Frequency",
+                    labels = c("Above Average", "Below Average"),
+                    values = c("pos" = "#00ba38", "neg" = "#f8766d" )) +
+  coord_flip() +
+  theme(legend.position = "right", axis.text.y = element_text(size = 8))
+
+
+freq_df = 
+  instacart_df %>%
+  #filter(department %in% c("produce", "meat seafood")) %>%
+  group_by(product_name, department) %>%
+  summarise(n_ordered = n()) %>% 
+  mutate(product_name = forcats::fct_reorder(product_name, n_ordered)) %>%
+  filter(n_ordered >= 100)
+  
+freq_gg =  
+  freq_df %>% 
+  ggplot(aes(x = product_name, y = n_ordered, fill = department)) +
+  geom_bar(stat = "identity") +
+  theme(legend.position = "right", 
+        axis.text.x = element_blank(),
+        axis.title.x = element_blank()) +
+  labs(y = "Number of Orders Per Product", title = "What Products are Ordered Most Often?")
+
+ggplotly(freq_gg)
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+
+```
+
+### Chart C
+
+```{r}
+
+
+```
+ 
