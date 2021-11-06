@@ -4,8 +4,27 @@ output:
   html_document:
     toc: true
     toc_float: true
+    theme: paper
 ---
 
-this website is about how cool the internet is!!
+A brief overview of my education and research experiences.
 
-here's back to the [index](index.html) page.
+### Research
+--**Laboratory of Dr. Junhyong Kim, University of Pennsylvania Biology Department**
+<br>
+As a research technician in Dr. Kim's lab, which focuses on single cell and sub-cellular transcriptomics to understand the biology of the cell, I was responsible for running and maintaining the lab's Illumina Next Generation Sequencer.
+    
+--**NYS Office of the Attorney General, Environmental Protection Bureau**
+<br>
+As a science intern, I researched and validated claims made in a 2018 legal complaint about PFAS groundwater contamination in the Hudson Valley of New York.
+
+
+### Education
+
+**Columbia University Mailman School of Public Health, PhD in Environmental Health Sciences**
+<br>
+Sept. 2021 - Present
+
+**Vassar College, Bachelor of Arts in Biochemistry**
+<br>
+Aug. 2015 - May 2019
