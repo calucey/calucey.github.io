@@ -8,6 +8,7 @@ output:
 ---
 ```{r setup, include = FALSE}
 library(tidyverse)
+library(tidyr)
 library(p8105.datasets)
 library(plotly)
 library(flexdashboard)
@@ -31,63 +32,19 @@ data("instacart")
 
 instacart_df = 
   instacart %>% 
-  select(add_to_cart_order, reordered, order_hour_of_day, product_name, aisle_id, department_id, aisle, department) %>% 
+  select(add_to_cart_order, order_id, reordered, order_hour_of_day, product_name, aisle_id, department_id, aisle, department) %>% 
   filter(reordered == 1, department %in% c("produce", "meat seafood", "dairy eggs", "snacks", "frozen")) %>% 
   filter(department != "missing")
 
 ```
 
 
- Column {data-width=650}
+ Column {data-width=600}
 -----------------------------------------------------------------------
 
 ### What items are orderd the most often?
 
 ```{r}
-
-freq_produce = 
-  instacart_df %>%
-  filter(department == "produce") %>% 
-  group_by(product_name) %>%
-  summarise(n_ordered = n()) %>% 
-  filter(n_ordered >= 2000) %>% 
-  mutate(avg_ordered = mean(n_ordered),
-         norm = n_ordered - avg_ordered) %>% 
-  mutate(product_name = forcats::fct_reorder(product_name, norm)) %>% 
-  mutate(sign = ifelse(norm < 0, "neg", "pos"))
-
-freq_meat =
-  instacart_df %>%
-  #filter(reordered == 1, department %in% c("produce", "meat seafood")) %>% 
-  filter(department == "meat seafood") %>% 
-  group_by(product_name) %>%
-  summarise(n_ordered = n()) %>% 
-  filter(n_ordered >= 100) %>% 
-  mutate(avg_ordered = mean(n_ordered),
-         norm = n_ordered - avg_ordered) %>% 
-  mutate(product_name = forcats::fct_reorder(product_name, norm)) %>% 
-  mutate(sign = ifelse(norm < 0, "neg", "pos"))
-
-freq_produce_gg =
-  freq_produce %>% 
-  ggplot(aes(x = product_name, y = norm, fill = sign)) +
-  geom_bar(stat = "identity") +
-  scale_fill_manual(name = "Order Frequency",
-                    labels = c("Above Average", "Below Average"),
-                    values = c("pos" = "#00ba38", "neg" = "#f8766d" )) +
-  coord_flip() +
-  theme(legend.position = "right", axis.text.y = element_text(size = 8))
-           
-freq_meat_gg =  
-  freq_meat %>% 
-  ggplot(aes(x = product_name, y = norm, fill = sign)) +
-  geom_bar(stat = "identity") +
-  scale_fill_manual(name = "Order Frequency",
-                    labels = c("Above Average", "Below Average"),
-                    values = c("pos" = "#00ba38", "neg" = "#f8766d" )) +
-  coord_flip() +
-  theme(legend.position = "right", axis.text.y = element_text(size = 8))
-
 
 freq_df = 
   instacart_df %>%
@@ -109,7 +66,7 @@ ggplotly(freq_gg)
 
 ```
 
-Column {data-width=350}
+Column {data-width=400}
 -----------------------------------------------------------------------
 
 ### At What Time of Day are Items Ordered?
@@ -120,18 +77,47 @@ instacart_df %>%
   group_by(order_hour_of_day, department) %>%
   summarise(n_ordered = n()) %>% 
   mutate(
-    text_label = str_c("Hour:", order_hour_of_day, "\n Number Ordered:", n_ordered)
+    text_label = str_c("Hour: ", order_hour_of_day, "\nNumber Ordered: ", n_ordered, "\nDepartment: ", department)
   ) %>% 
   plot_ly(
     y = ~ n_ordered, x = ~order_hour_of_day, color = ~department, text = ~text_label, type = "scatter"
-  )
+  ) %>% 
+  layout(yaxis = list(title = "Number of Items Ordered"), xaxis = list(title = "Hour of Day (1-24)"), legend = list(title = list(text = "<b> Department </b>")))
 
 ```
 
-### Chart C
+### Do Orders That Include More Snacks Include Less Produce?
 
 ```{r}
 
+n_snacks =
+  instacart_df %>% 
+  filter(department == "snacks") %>% 
+  group_by(order_id) %>% 
+  summarise(n_snacks = n())
+  
+n_produce =
+  instacart_df %>% 
+  filter(department == "produce") %>% 
+  group_by(order_id) %>% 
+  summarise(n_produce = n())
+  
+snacks_produce_df =
+  full_join(n_snacks, n_produce, by = "order_id") %>% 
+  drop_na()
+
+snacks_produce_df %>%
+  mutate(size_diff = abs(n_produce - n_snacks)) %>% 
+  plot_ly(
+    x = ~n_produce, 
+    y = ~n_snacks, 
+    type = "scatter", 
+    mode = "markers",
+    marker = list(size = ~size_diff, opacity = 0.5)
+  ) %>% 
+  layout(title = "Relative Frequency of Snacks and Produce per Order", 
+         xaxis = list(title = "Number of Items of Produce Ordered"), 
+         yaxis = list(title = "Number of Snack Items Ordered"))
 
 ```
  
